@@ -129,7 +129,7 @@ class Data:
             return None  # Not mapped in the file
         
         if self.type.size <= 0 and self.size:  # Variable size data with a known size (e.g., string)
-            return self.program.read_bytes(self.file_offset, self.size)
+            return self.program.executable.read_bytes(self.file_offset, self.size)
         else:  # Try reading the value as a type
             return self.program.executable.read_type_value(self.file_offset, self.type)
 

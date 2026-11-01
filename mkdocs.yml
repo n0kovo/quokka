@@ -39,6 +39,7 @@ nav:
       - Cross-References: xrefs.md
       - Decompilation: decompilation.md
       - P-code Lifting: pcode.md
+      - kuna Backend: kuna.md
       - Write Features: write_feature.md
   - Tutorials:
       - First steps: tutorials/qb-crackme/

@@ -25,7 +25,7 @@ from quokka.types import AddressT, Endianness
 
 def get_capstone_context(
         arch: Type[quokka.analysis.QuokkaArch],
-        endian: Type[Endianness] = Endianness.LITTLE_ENDIAN) -> capstone.Cs:
+        endian: Endianness = Endianness.LITTLE_ENDIAN) -> capstone.Cs:
     """Compute the capstone context for the program
 
     The Capstone context is used to decode instructions afterwards. Since we are

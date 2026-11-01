@@ -23,7 +23,8 @@ Table of Contents
 
 Quokka is a binary exporter: from the disassembly of a program, it generates
 an export file that can be used without the disassembler. It currently supports
-**IDA Pro**, **Ghidra** and **Binary Ninja** as disassembly backends.
+**IDA Pro**, **Ghidra**, **Binary Ninja** and the **kuna** decompiler as
+disassembly backends.
 
 The main objective of **Quokka** is to enable to completely manipulate the
 binary without ever opening a disassembler after the initial export. Moreover, it
@@ -104,6 +105,20 @@ produces the same `.quokka` protobuf files that the Python library can load.
 For installation and usage details see the
 [BinaryNinja extension README](binaryninja_extension/README.md).
 
+### kuna backend
+
+Quokka can also export without any disassembler GUI or license, using the
+stand-alone [kuna](https://github.com/Noelo-Lab/kuna) decompiler CLI. The
+exporter is part of the Python package:
+
+```commandline
+$ pip install 'quokka-project[kuna]'   # pulls LIEF
+$ quokka-cli --backend kuna binary
+```
+
+`kuna` must be on `PATH` (or set `KUNA_PATH`). See the
+[kuna backend documentation](docs/kuna.md) for details and limitations.
+
 ## Usage
 
 ### Exporting via GUI
@@ -164,11 +179,12 @@ See the [BinaryNinja extension README](binaryninja_extension/README.md) for more
 
 Quokka provides a CLI utility tool to automatically export one or more files
 and/or directories (all executable files in each directory) in parallel.
-It supports both IDA Pro and Ghidra backends:
+It supports the IDA Pro, Ghidra and kuna backends:
 
 ```commandline
 $ quokka-cli --backend ghidra -t 8 dir/
 $ quokka-cli --backend ida --ida-path /opt/ida -t 8 dir/
+$ quokka-cli --backend kuna -t 8 dir/
 $ quokka-cli -t 8 dir/                          # auto-detect backend
 $ quokka-cli -o "%p/exports/%f.quokka" binary   # custom output directory
 $ quokka-cli -b ida -o %F_ida.quokka -t 4 dir/  # Using relative path
@@ -182,12 +198,13 @@ literal path or a template expanded per file (`%f` = stem, `%F` = filename,
 
 Run `quokka-cli --help` for all options. Key flags include:
 
-* `-b`, `--backend` to choose the disassembler backend (`ida`, `ghidra`, or `auto`)
+* `-b`, `--backend` to choose the disassembler backend (`ida`, `ghidra`, `kuna` or `auto`)
 * `-i`, `--ida-path` to provide the path to the IDA installation directory (the folder containing `idat`)
 * `--ghidra-path` to provide the Ghidra installation directory (overrides `GHIDRA_INSTALL_DIR`)
+* `--kuna-path` to provide the kuna executable (overrides `KUNA_PATH`)
 * `-o`, `--output` to set the output path or template (default: `%F.quokka`)
 * `-m`, `--mode` to choose the export mode (`light` or `full`)
-* `--decompiled` to enable decompiled code export (IDA only)
+* `--decompiled` to enable decompiled code export (IDA and kuna)
 * `-v`, `--verbose` to enable verbose logging
 
 
@@ -203,6 +220,7 @@ prog = quokka.Program.from_binary("/bin/ls")
 # Explicitly choose a backend
 prog = quokka.Program.from_binary("/bin/ls", disassembler=Disassembler.GHIDRA)
 prog = quokka.Program.from_binary("/bin/ls", disassembler=Disassembler.IDA)
+prog = quokka.Program.from_binary("/bin/ls", disassembler=Disassembler.KUNA)
 
 # From the exported file
 prog = quokka.Program("ls.quokka",  # the exported file

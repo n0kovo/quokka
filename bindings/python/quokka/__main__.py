@@ -260,7 +260,7 @@ def run_sequential(
 @click.option(
     "-b",
     "--backend",
-    type=click.Choice(["ida", "ghidra", "auto"], case_sensitive=False),
+    type=click.Choice(["ida", "ghidra", "kuna", "auto"], case_sensitive=False),
     default="auto",
     help="Disassembler backend (default: auto-detect)",
 )
@@ -277,6 +277,12 @@ def run_sequential(
     default=None,
     help="Ghidra installation directory (overrides GHIDRA_INSTALL_DIR)",
 )
+@click.option(
+    "--kuna-path",
+    type=click.Path(exists=True),
+    default=None,
+    help="kuna executable (or its directory); overrides KUNA_PATH",
+)
 @click.option("--timeout", type=int, default=0, help="Timeout for each export in seconds")
 @click.option("--override", is_flag=True, default=False, help="Override existing .quokka files")
 @click.option("-t", "--threads", type=int, default=1, help="Thread number to use")
@@ -289,6 +295,7 @@ def main(
     backend: str,
     ida_path: str,
     ghidra_path: str,
+    kuna_path: str,
     input_files: tuple,
     threads: int,
     verbose: bool,
@@ -303,8 +310,8 @@ def main(
     for one or more binaries and/or directories. It will open every binary
     file and export files seamlessly.
 
-    Supports both IDA Pro and Ghidra backends. Use --backend to choose, or
-    let auto-detection pick whichever is available.
+    Supports the IDA Pro, Ghidra and kuna backends. Use --backend to choose,
+    or let auto-detection pick whichever is available.
     """
 
     logging.basicConfig(
@@ -340,7 +347,18 @@ def main(
                 "Ghidra export does not support decompilation yet; "
                 "ignoring --decompiled flag."
             )
+    elif backend == "kuna":
+        disassembler = Disassembler.KUNA
+        from quokka.backends.kuna import KUNA_PATH_ENV, find_kuna
+        if kuna_path:
+            os.environ[KUNA_PATH_ENV] = kuna_path
+        if find_kuna() is None:
+            logging.error("kuna not found. Put it on PATH, set KUNA_PATH or use --kuna-path")
+            exit(1)
     else:  # auto
+        if kuna_path:
+            from quokka.backends.kuna import KUNA_PATH_ENV
+            os.environ[KUNA_PATH_ENV] = kuna_path
         if ida_path:
             os.environ["IDA_PATH"] = ida_path
         if ghidra_path:

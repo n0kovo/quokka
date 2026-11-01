@@ -77,6 +77,7 @@ message Quokka {
         DISASS_IDA = 1;
         DISASS_GHIDRA = 2;
         DISASS_BINARY_NINJA = 3;
+        DISASS_KUNA = 4;
       }
       Disassembler name = 1;
 

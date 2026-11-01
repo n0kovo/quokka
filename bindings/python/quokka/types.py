@@ -308,6 +308,7 @@ class Disassembler(enum.Enum):
     IDA = enum.auto()
     GHIDRA = enum.auto()
     BINARY_NINJA = enum.auto()
+    KUNA = enum.auto()
 
     @staticmethod
     def from_proto(
@@ -318,6 +319,7 @@ class Disassembler(enum.Enum):
             Pb.Meta.Backend.Disassembler.DISASS_IDA: Disassembler.IDA,
             Pb.Meta.Backend.Disassembler.DISASS_GHIDRA: Disassembler.GHIDRA,
             Pb.Meta.Backend.Disassembler.DISASS_BINARY_NINJA: Disassembler.BINARY_NINJA,
+            Pb.Meta.Backend.Disassembler.DISASS_KUNA: Disassembler.KUNA,
         }
 
         return mapping.get(proto_disass, Disassembler.UNKNOWN)

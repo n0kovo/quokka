@@ -41,6 +41,7 @@ test = [
     "pypcode>=2.0.0",
 ]
 pypcode = ["pypcode>=2.0.0"]
+kuna = ["lief>=0.15"]
 doc = [
     "mkdocs",
     "mkdocs-material",
@@ -63,6 +64,6 @@ dev = [
 ]
 
 [tool.setuptools]
-packages = ["quokka", "quokka.analysis", "quokka.backends", "quokka.backends.ida"]
+packages = ["quokka", "quokka.analysis", "quokka.backends", "quokka.backends.ida", "quokka.backends.kuna"]
 package-dir = { "" = "bindings/python/" }
 package-data = { "quokka" = ["*.pyi", "*.typed"] }

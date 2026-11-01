@@ -231,3 +231,15 @@ Ninja user plugin folder manually.
     the repository, so no generation step is needed to install. After
     changing `proto/quokka.proto`, regenerate it as described in the
     [extension README](https://github.com/quarkslab/quokka/blob/main/binaryninja_extension/README.md).
+
+## kuna backend
+
+The kuna exporter is pure Python and ships with the bindings. It needs the
+[kuna](https://github.com/Noelo-Lab/kuna) executable (on `PATH`, or set
+`KUNA_PATH`) and LIEF:
+
+```commandline
+$ pip install 'quokka-project[kuna]'
+```
+
+See [kuna backend](kuna.md) for usage and limitations.

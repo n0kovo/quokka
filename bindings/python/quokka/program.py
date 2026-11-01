@@ -838,12 +838,16 @@ class Program(dict):
         """Auto-detect an available disassembler backend.
 
         Prefers IDA if ``idascript`` is importable and ``IDA_PATH`` is set,
-        otherwise falls back to Ghidra if ``GHIDRA_INSTALL_DIR`` is set.
+        otherwise falls back to Ghidra if ``GHIDRA_INSTALL_DIR`` is set, and
+        then to kuna if its executable is on ``PATH`` (or in ``KUNA_PATH``).
         """
         if idascript is not None and idascript.get_ida_path():
             return Disassembler.IDA
         if os.environ.get("GHIDRA_INSTALL_DIR"):
             return Disassembler.GHIDRA
+        from quokka.backends.kuna import find_kuna
+        if find_kuna() is not None:
+            return Disassembler.KUNA
         return Disassembler.UNKNOWN
 
     @staticmethod
@@ -1047,6 +1051,29 @@ class Program(dict):
         return output_file
 
     @staticmethod
+    def _generate_kuna(
+        exec_path: Path,
+        output_file: Path,
+        decompiled: bool,
+        timeout: int|None,
+        mode: ExporterMode,
+    ) -> Path:
+        """Export with the kuna decompiler (see :mod:`quokka.backends.kuna`)."""
+        from quokka.backends.kuna import export_binary
+
+        return export_binary(
+            exec_path,
+            output_file,
+            mode=(
+                Pb.ExporterMeta.MODE_SELF_CONTAINED
+                if mode == ExporterMode.FULL
+                else Pb.ExporterMeta.MODE_LIGHT
+            ),
+            decompiled=decompiled,
+            timeout=timeout or None,
+        )
+
+    @staticmethod
     def generate(
         exec_path: Path|str,
         output_file: Path|str|None = None,
@@ -1115,6 +1142,14 @@ class Program(dict):
                     database_file=database_file,
                     decompiled=decompiled,
                     debug=debug,
+                    timeout=timeout,
+                    mode=mode,
+                )
+            case Disassembler.KUNA:
+                return Program._generate_kuna(
+                    exec_path=exec_path,
+                    output_file=output_file,
+                    decompiled=decompiled,
                     timeout=timeout,
                     mode=mode,
                 )
@@ -1400,6 +1435,8 @@ class Program(dict):
                 )
             case Disassembler.BINARY_NINJA:
                 raise NotImplementedError("Binary Ninja export is not implemented yet")
+            case Disassembler.KUNA:
+                raise NotImplementedError("kuna keeps no database: edits cannot be committed")
             case _:
                 raise NotImplementedError("Unknown disassembler")
 

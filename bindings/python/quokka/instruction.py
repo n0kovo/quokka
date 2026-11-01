@@ -184,8 +184,7 @@ class OperandFull(Operand):
             case OperandType.IMMEDIATE:
                 return self.proto.value
             case OperandType.REGISTER:
-                # Go get register string in the register table of the program
-                return self.program.proto.register_table[self.proto.register_index]
+                return self.register
             case OperandType.MEMORY:
                 return self.proto.address
             case OperandType.OTHER:
@@ -193,9 +192,15 @@ class OperandFull(Operand):
 
     @property
     def register(self) -> str:
-        if self.type == OperandType.REGISTER:
-            return self.program.proto.register_table[self.proto.register_index]
-        return ""
+        if self.type != OperandType.REGISTER:
+            return ""
+        # Exporters store either the register name (Ghidra, kuna) or its
+        # index in the register table as a string (Binary Ninja).
+        index = self.proto.register_index
+        table = self.program.proto.register_table
+        if index.isdigit() and int(index) < len(table):
+            return table[int(index)]
+        return index
 
     @property
     def access(self) -> AccessMode:
@@ -649,10 +654,8 @@ class Instruction:
         if self.program.mode == ExporterMode.LIGHT:
             return f"{self.cs_inst.mnemonic} {self.cs_inst.op_str}"
         elif self.program.mode == ExporterMode.FULL:
-            operands = ", ".join(
-                self.program.proto.operand_table[x] for x in self.proto.operand_strings  # FIXME: operand_strings do not exists anymore
-            )
-            return f"{self.mnemonic} {operands}"
+            operands = ", ".join(str(op) for op in self.operands)
+            return f"{self.mnemonic} {operands}".rstrip()
         else:
             assert False
 
